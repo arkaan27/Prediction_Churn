@@ -1,0 +1,15 @@
+name: predict-churn
+
+dependencies:
+  - ipython
+  - matplotlib
+  - pandas
+  - pip
+  - python
+  - scikit-learn
+  - seaborn
+  - matplotlib
+  - scikit-learn
+  - pip:
+      shap
+      joblib
