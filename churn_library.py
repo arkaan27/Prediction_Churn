@@ -2,6 +2,19 @@
 """
 Module for assisting the churn scripting
 
+Contains the following functions:
+
+1. import_data
+2. perform_eda
+3. encoder_helper
+4. perform_feature_engineering
+5. classificatiton_report_image
+6. roc_curve_plot
+7. shap_explainer_plot
+8. feature_importance_plot
+9. train_models
+10. main
+
 Author: Arkaan Quanunga
 Date: 25/12/2021
 """
@@ -30,56 +43,64 @@ def import_data(pth):
     input:
             pth: a path to the csv
     output:
-            data: pandas dataframe
+            data_frame: pandas dataframe
     """
 
-    data = pd.read_csv(pth)
-    data['Churn'] = data['Attrition_Flag'].apply(
+    # Reads file from pth and creates data frame
+
+    data_frame = pd.read_csv(pth)
+
+    # Creates column 'Churn' for future references in the data
+    data_frame['Churn'] = data_frame['Attrition_Flag'].apply(
         lambda val: 0 if val == "Existing Customer" else 1)
-    return data
+
+    # Returns data
+    return data_frame
 
 
-def perform_eda(data):
+def perform_eda(data_frame):
     """
     perform eda on df and save figures to images folder
     input:
-            data: pandas dataframe
+            data_frame: pandas dataframe
 
     output:
             None
     """
+
+    # Saves Churn Histogram figure
     plt.figure(figsize=(20, 10))
-    data['Churn'].hist()
+    data_frame['Churn'].hist()
     plt.savefig('./images/eda/Churn_histogram.png')
 
-    # Saves Customer Age Distribution
+    # Saves Customer Age Distribution figure
     plt.figure(figsize=(20, 10))
-    data['Customer_Age'].hist()
+    data_frame['Customer_Age'].hist()
     plt.savefig('./images/eda/Customer_Age_Histogram.png')
 
-    # Saves Martial Status Normalised graph
+    # Saves Martial Status Normalised graph  figure
     plt.figure(figsize=(20, 10))
-    data.Marital_Status.value_counts('normalize').plot(kind='bar')
+    data_frame.Marital_Status.value_counts('normalize').plot(kind='bar')
     plt.savefig('./images/eda/Martial_Status_Normalized_graph.png')
 
-    # Saves Total Transaction
+    # Saves Total Transaction figure
     plt.figure(figsize=(20, 10))
-    sns.distplot(data['Total_Trans_Ct'])
+    sns.distplot(data_frame['Total_Trans_Ct'])
     plt.savefig('./images/eda/Total_Trans_Ct.png')
 
-    # Saves Heatmap
+    # Saves Heatmap figure
     plt.figure(figsize=(20, 10))
-    sns.heatmap(data.corr(), annot=False, cmap='Dark2_r', linewidths=2)
+    sns.heatmap(data_frame.corr(), annot=False, cmap='Dark2_r', linewidths=2)
     plt.savefig('./images/eda/heatmap.png')
 
 
-def encoder_helper(data, category_lst, response):
+def encoder_helper(data_frame, category_lst, response):
     """
     helper function to turn each categorical column into a new column with
     propotion of churn for each category - associated with cell 15 from the notebook
 
     input:
-            data: pandas dataframe
+            data_frame: pandas dataframe
             category_lst: list of columns that contain categorical features
             response: string of response name
             [optional argument that could be used for naming variables or index y column]
@@ -89,21 +110,16 @@ def encoder_helper(data, category_lst, response):
     """
 
     for col in category_lst:
-        means = data.groupby(col)['Churn'].mean()
-        data[col + response] = data[col].map(means)
+        means = data_frame.groupby(col)['Churn'].mean()
+        data_frame[col + response] = data_frame[col].map(means)
 
-    return data
-    # category_group = data.groupby(response).mean()['Churn']
-    #
-    # for val in data[response]:
-    #     category_lst.append(category_group.loc[val])
-    #     data[response + '_Churn'] = category_lst
+    return data_frame
 
 
-def perform_feature_engineering(data):
+def perform_feature_engineering(data_frame):
     """
     input:
-              data: pandas dataframe
+              data_frame: pandas dataframe
               response: string of response name
               [optional argument that could be used for naming variables or index y column]
 
@@ -113,7 +129,8 @@ def perform_feature_engineering(data):
               y_train: y training data
               y_test: y testing data
     """
-    y = data.Churn
+    # Defining variables
+    y = data_frame.Churn
     X = pd.DataFrame()
     keep_cols = [
         'Customer_Age',
@@ -135,7 +152,10 @@ def perform_feature_engineering(data):
         'Marital_Status_Churn',
         'Income_Category_Churn',
         'Card_Category_Churn']
-    X[keep_cols] = data[keep_cols]
+
+    X[keep_cols] = data_frame[keep_cols]
+
+    # Splitting data
 
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=0.3, random_state=42)
@@ -163,12 +183,14 @@ def classification_report_image(y_train,
     output:
              None
     """
+
     # RF model
+
     plt.rc('figure', figsize=(5, 5))
     plt.text(0.01, 1.25, str('Random Forest Train'), {
         'fontsize': 10}, fontproperties='monospace')
     plt.text(0.01, 0.05, str(classification_report(y_test, y_test_preds_rf)), {'fontsize': 10},
-             fontproperties='monospace')  # approach improved by OP -> monospace!
+             fontproperties='monospace')
     plt.text(0.01, 0.6, str('Random Forest Test'), {
         'fontsize': 10}, fontproperties='monospace')
     plt.text(
@@ -208,6 +230,8 @@ def roc_curve_plot(model, X, y, output_pth):
     :param output_pth: path to save the figure
     :return:
     """
+
+    # Creates plot for roc_curve
     plt.figure(figsize=(15, 8))
     RocCurveDisplay.from_estimator(model, X, y)
     plt.savefig(output_pth)
@@ -221,6 +245,8 @@ def shap_explainer_plot(model, X, output_pth):
     :param output_pth: path to save the figure (str)
     :return:
     """
+
+    # Creates explainer plot
     explainer = shap.TreeExplainer(model)
     shap_values = explainer.shap_values(X)
     shap.summary_plot(shap_values, X, plot_type="bar")
@@ -278,15 +304,7 @@ def train_models(X_train, X_test, y_train, y_test):
     rfc = RandomForestClassifier(random_state=42)
     lrc = LogisticRegression()
 
-    # Deep grid search
-    # param_grid = {
-    #     'n_estimators': [200, 500],
-    #     'max_features': ['auto', 'sqrt'],
-    #     'max_depth': [4, 5, 100],
-    #     'criterion': ['gini', 'entropy']
-    # }
-
-    # Shallow grid search
+    # Grid search
     param_grid = {
         'n_estimators': [20, 50],
         'max_features': ['auto', 'sqrt'],
@@ -306,6 +324,7 @@ def train_models(X_train, X_test, y_train, y_test):
     y_test_preds_lr = lrc.predict(X_test)
 
     # Save results to images/
+
     classification_report_image(
         y_train, y_test,
         y_train_preds_lr, y_train_preds_rf,
@@ -325,19 +344,3 @@ def train_models(X_train, X_test, y_train, y_test):
     # Save best model to models/
     joblib.dump(cv_rfc.best_estimator_, './models/rfc_model.pkl')
     joblib.dump(lrc, './models/logistic_model.pkl')
-
-
-def main():
-    """
-    Running the file
-    :return:
-    """
-    data = import_data('./data/bank_data.csv')
-    perform_eda(data)
-    encoded_df = encoder_helper(data, constants.CAT_COLUMNS, '_Churn')
-    X_train, X_test, y_train, y_test = perform_feature_engineering(encoded_df)
-    train_models(X_train, X_test, y_train, y_test)
-
-
-if __name__ == "__main__":
-    main()

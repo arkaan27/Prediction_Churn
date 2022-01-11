@@ -1,16 +1,28 @@
-# This is a sample Python script.
+"""
+Main file for the model
 
-# Press Shift+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
+Author: Arkaan Quanunga
+
+Date: 11/01/2022
+"""
+import churn_library as cl
+import constants
 
 
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
-
-
-# Press the green button in the gutter to run the script.
 if __name__ == '__main__':
-    print_hi('PyCharm')
 
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+    # Importing data
+    data_frame = cl.import_data('./data/bank_data.csv')
+
+    # Performing Exploratory Data Analysis
+    cl.perform_eda(data_frame)
+
+    # Encoding the data
+    encoded_df = cl.encoder_helper(data_frame, constants.CAT_COLUMNS, '_Churn')
+
+    # Splitting the data
+    X_train, X_test, y_train, y_test = cl.perform_feature_engineering(encoded_df)
+
+    # Training the model
+    cl.train_models(X_train, X_test, y_train, y_test)
+

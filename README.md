@@ -14,12 +14,25 @@ This code has followed PEP8 compliance as required.
 
 Install dependencies in the environment.yml file, ideally in a new conda environment by running
 
-`$ conda env create -f environment`
+`$ conda env create -f environment.yml`
+
+If this does not work, run the following commands in the terminal:
+
+`pip install shap`
+
+`pip install joblib`
+
+`pip install sklearn`
+
+`pip install scikit-learn`
+
+`pip install ipython`
+
 
 This will create a new conda environment named predict_churn, unless you change the name of the environment by adjusting the first line of environment.yml
 2. Run churn_library.py
 
-To preprocess the raw data, conduct eda on that data, train the models, and export model results run the following from the command line:
+To preprocess the raw data, conduct exploratory data analysis on that data, train the models, and export model results run the following from the command line:
 
 `$ python churn_library.py`
 
