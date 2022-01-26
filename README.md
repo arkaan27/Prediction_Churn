@@ -3,7 +3,7 @@
 - Project **Predict Customer Churn** of ML DevOps Engineer Nanodegree Udacity
 
 ## Project Description
-Churn prediction model for bank data. This project reads a csv file bank_data.csv and performs exploratory data analysis in modular manner
+Churn prediction model for bank data. This project reads a csv file bank_data.csv and performs exploratory data analysis in modular manner.
 The code is production level ready for deployment as it is fully tested and logged.
 This code has followed PEP8 compliance as required.
             
